@@ -1,0 +1,9 @@
+Copyright © 2024 Matheus Chiodi
+
+Todos os direitos reservados.
+
+Este software é fornecido sob licença restrita. É estritamente proibido:
+- Remover marcas, créditos ou identificações do autor.
+- Redistribuir este código sem autorização expressa.
+
+O uso é permitido apenas com atribuição à marca. O não cumprimento resultará em ações legais.
