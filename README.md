@@ -54,17 +54,6 @@ pip install flask pycoingecko
    http://127.0.0.1:5000
    ```
 
-## Project Structure
-
-```
-├── app.py                # Main application code
-├── templates/            # HTML files for rendering
-│   ├── index.html
-│   ├── monitorar.html
-├── static/               # CSS files and other static resources
-├── README.md             # Project documentation
-```
-
 ## License
 
 This software is copyrighted. Usage is allowed only with attribution to the brand. See the `LICENSE` file for more information.
