@@ -2,28 +2,27 @@ from flask import Flask, render_template, request, redirect, url_for
 from pycoingecko import CoinGeckoAPI
 import time
 import threading
+import requests
 
 app = Flask(__name__)
 
 # Configuração inicial
-moedas = ['bitcoin', 'dogecoin', 'ethereum', 'binance-coin-wormhole', 'ripple', 'thena']
+moedas = ['bitcoin', 'dogecoin', 'ethereum', 'binance-coin-wormhole', 'ripple']
 moedas_sugestoes = {
     'bitcoin': {'preco_compra': 0, 'descricao': 'Principal criptomoeda do mercado.'},
     'ethereum': {'preco_compra': 0, 'descricao': 'Plataforma líder para contratos inteligentes.'},
     'dogecoin': {'preco_compra': 0, 'descricao': 'Moeda meme com alto potencial especulativo.'},
     'binance-coin-wormhole': {'preco_compra': 0, 'descricao': 'Moeda da exchange Binance (BNB).'},
     'ripple': {'preco_compra': 0, 'descricao': 'Moeda para transações bancárias. (XRP)'},
-    'thena': {'preco_compra': 0, 'descricao': 'Moeda de cripto-fiat com alto valor.'},
 }
 
 # Dados de compras (adicionados manualmente no código)
 compras_moedas = {
-    'bitcoin': {'quantidade': 0.00011367, 'preco_compra': 98582.94},
+    'bitcoin': {'quantidade': 0.00026025, 'preco_compra': 97510.30},
     'ethereum': {'quantidade': 0, 'preco_compra': 0},
     'dogecoin': {'quantidade': 51.14961121, 'preco_compra': 0.42},
     'binance-coin-wormhole': {'quantidade': 0.01551858, 'preco_compra': 652.61},
     'ripple': {'quantidade': 7.23655381, 'preco_compra': 1.38},
-    'thena': {'quantidade': 4.66683051, 'preco_compra': 3.40},
 }
 
 monitorando = False
@@ -114,16 +113,47 @@ def recomendacao_investimento(moedas_sugestoes, precos, start_index=10):
 
     return recomendacoes
 
+def obter_cotacao_dolar():
+    """
+    Obtém a cotação atual do dólar em relação ao real.
+    """
+    url = "https://economia.awesomeapi.com.br/json/last/USD-BRL"
+    response = requests.get(url)
+    if response.status_code == 200:
+        dados = response.json()
+        cotacao = float(dados['USDBRL']['bid'])  # Obtém o valor de compra
+        return cotacao
+    return None
+
+def calcular_valor_em_reais(valor_dolar, cotacao_dolar):
+    """
+    Converte um valor em dólares para reais usando a cotação atual.
+    """
+    return round(valor_dolar * cotacao_dolar, 2)
+
 
 @app.route("/")
 def index():
     """
-    Página inicial que exibe preços e recomendações.
+    Página inicial que exibe preços, recomendações e cotação do dólar.
     """
     precos = obter_precos(moedas)
     recomendacoes = recomendacao_investimento(moedas_sugestoes, precos, start_index=10)
     gasto_total, valor_atual = calcular_totais(precos)
-    return render_template("index.html", recomendacoes=recomendacoes, gasto_total=gasto_total, valor_atual=valor_atual)
+    
+    # Cotação do dólar
+    cotacao_dolar = obter_cotacao_dolar()
+    valor_reais = calcular_valor_em_reais(valor_atual, cotacao_dolar) if cotacao_dolar else "Indisponível"
+    
+    return render_template(
+        "index.html",
+        recomendacoes=recomendacoes,
+        gasto_total=gasto_total,
+        valor_atual=valor_atual,
+        cotacao_dolar=cotacao_dolar,
+        valor_reais=valor_reais
+    )
+
 
 
 @app.route("/monitorar", methods=["GET", "POST"])
